@@ -2,6 +2,8 @@ import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ArticleList } from "@/components/article-list";
+
 
 export default function Home() {
   return (
@@ -16,6 +18,7 @@ export default function Home() {
             This is the Home page
           </h1>
         {/* </header> */}
+        <ArticleList />
 
         <SignedIn>
           <Link href="/create">

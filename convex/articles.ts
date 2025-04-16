@@ -124,3 +124,26 @@ export const updateArticle = mutation({
     return { success: true };
   },
 });
+
+export const getAllArticles = query({
+  handler: async (ctx) => {
+    const articles = await ctx.db.query("articles").collect();
+    
+    // Get image URLs for all articles
+    const articlesWithImages = await Promise.all(
+      articles.map(async (article) => {
+        let imageUrl = null;
+        if (article.imageStorageId) {
+          imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+        }
+        return {
+          ...article,
+          imageUrl,
+        };
+      })
+    );
+
+    // Sort by creation date, newest first
+    return articlesWithImages.sort((a, b) => b.createdAt - a.createdAt);
+  },
+});

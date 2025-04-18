@@ -16,26 +16,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FormEvent, useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
+import { CategorySelector } from "@/components/category-selector";
+import { TopicsSelector } from "@/components/topics-selector";
+import { Id } from "@/convex/_generated/dataModel";
 
 // Form schema validation
 const formSchema = z.object({
   title: z.string().min(5, "Title too short"),
   body: z.string(),
-  category: z.enum(["politics", "technology", "finance"]),
-  tags: z.string(),
-  imageUrl: z.string().optional(),
+  categoryId: z.custom<Id<"categories">>(),
 });
 
 export default function CreatePage() {
@@ -43,6 +36,7 @@ export default function CreatePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [topicIds, setTopicIds] = useState<Id<"topics">[]>([]);
   const createArticle = useMutation(api.articles.createArticle);
   const generateUploadUrl = useMutation(api.articles.generateUploadUrl);
 
@@ -51,17 +45,13 @@ export default function CreatePage() {
     defaultValues: {
       title: "",
       body: "",
-      category: "technology",
-      tags: "",
+      categoryId: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-
-      // Convert tags string to array
-      const tagsArray = values.tags.split(",").map(tag => tag.trim());
 
       let imageStorageId: string | undefined;
       if (selectedImageFile) {
@@ -82,8 +72,8 @@ export default function CreatePage() {
       const { articleId } = await createArticle({
         title: values.title,
         body: values.body,
-        category: values.category,
-        tags: tagsArray,
+        categoryId: values.categoryId,
+        topicIds,
         imageStorageId,
       });
 
@@ -99,11 +89,9 @@ export default function CreatePage() {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      console.log("File selected:", file);
       setSelectedImageFile(file);
       const reader = new FileReader();
       reader.onload = () => {
-        console.log("File preview generated");
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
@@ -119,8 +107,9 @@ export default function CreatePage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Create New Article</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Create New Article</h1>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Image Upload */}
@@ -134,34 +123,13 @@ export default function CreatePage() {
             >
               <input {...getInputProps()} />
               {previewUrl ? (
-                <div className="relative w-full h-48">
+                <div className="relative w-full h-[400px]">
                   <Image
                     src={previewUrl}
                     alt="Preview"
                     fill
                     className="object-cover rounded-lg"
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPreviewUrl(null);
-                      form.setValue("imageUrl", "");
-                    }}
-                    className="absolute top-2 right-2 bg-white/80 rounded-full p-2 hover:bg-white"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center">
@@ -196,7 +164,7 @@ export default function CreatePage() {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Article title" {...field} />
+                  <Input placeholder="Enter article title" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -206,51 +174,13 @@ export default function CreatePage() {
           {/* Category */}
           <FormField
             control={form.control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="politics">Politics</SelectItem>
-                    <SelectItem value="technology">Technology</SelectItem>
-                    <SelectItem value="finance">Finance</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Tags */}
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags (comma-separated)</FormLabel>
                 <FormControl>
-                  <Input placeholder="tech, politics, economy" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Body */}
-          <FormField
-            control={form.control}
-            name="body"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Content</FormLabel>
-                <FormControl>
-                  <Textarea
+                  <CategorySelector
+                    value={field.value?.toString() || ""}
                     onChange={field.onChange}
                   />
                 </FormControl>
@@ -259,9 +189,43 @@ export default function CreatePage() {
             )}
           />
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Publishing..." : "Publish"}
-          </Button>
+          {/* Topics */}
+          <TopicsSelector
+            value={topicIds}
+            onChange={setTopicIds}
+          />
+
+          {/* Body */}
+          <FormField
+            control={form.control}
+            name="body"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Article Content</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Write your article content here"
+                    className="min-h-[300px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/")}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Article"}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

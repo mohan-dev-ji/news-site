@@ -44,7 +44,7 @@ export function FeaturedArticle() {
           ) : (
             <div className="absolute inset-0 bg-gray-200" />
           )}
-          <div className="absolute bottom-0 right-0 p-6 text-right">
+          <div className="absolute bottom-0 left-0 p-6 text-left">
             <h1 className="text-4xl font-bold text-white mb-2">
               {featuredArticle.title}
             </h1>

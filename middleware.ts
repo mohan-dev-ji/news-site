@@ -2,18 +2,24 @@ import { clerkMiddleware, createRouteMatcher, auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(['/create(.*)']);
-const ALLOWED_USER_ID = "user_2vjJoTOhJZ2fjcMWHwjhXMDKPpk";
+const isProtectedRoute = createRouteMatcher(['/create(.*)', '/admin(.*)']);
 
 export default clerkMiddleware(async (auth, request) => {
   // Check if the route is protected
   if (isProtectedRoute(request)) {
     const session = await auth();
     
-    // If user is not logged in or not the allowed user, redirect to home
-    if (!session?.userId || session.userId !== ALLOWED_USER_ID) {
+    console.log('Protected route accessed:', request.url);
+    console.log('Session userId:', session?.userId);
+    console.log('Admin userId:', process.env.NEXT_PUBLIC_ADMIN_USER_ID);
+    
+    // If user is not logged in or not the admin user, redirect to home
+    if (!session?.userId || session.userId !== process.env.NEXT_PUBLIC_ADMIN_USER_ID) {
+      console.log('Access denied - redirecting to home');
       return NextResponse.redirect(new URL('/', request.url));
     }
+    
+    console.log('Access granted');
   }
 
   return NextResponse.next();

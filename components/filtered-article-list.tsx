@@ -1,7 +1,5 @@
 "use client"
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Id } from "@/convex/_generated/dataModel";
@@ -34,17 +32,19 @@ const formatDate = (timestamp: number) => {
   });
 };
 
-export function ArticleList() {
-  const articles = useQuery(api.articles.getAllArticles);
+interface FilteredArticleListProps {
+  articles: Article[];
+}
 
-  if (!articles) {
-    return <div>Loading articles...</div>;
+export function FilteredArticleList({ articles }: FilteredArticleListProps) {
+  if (!articles || articles.length === 0) {
+    return <div>No articles found.</div>;
   }
 
   return (
     <div className="w-full">
       <div className="max-w-2xl mx-auto">
-        {articles.slice(1).map((article: Article) => (
+        {articles.map((article) => (
           <Link
             key={article._id}
             href={`/article/${article._id}`}

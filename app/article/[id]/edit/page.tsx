@@ -10,29 +10,31 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
+import { CategorySelector } from "@/components/category-selector";
 
 export default function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const article = useQuery(api.articles.getArticle, { id: resolvedParams.id as Id<"articles"> });
   const updateArticle = useMutation(api.articles.updateArticle);
   const generateUploadUrl = useMutation(api.articles.generateUploadUrl);
+  const createTopic = useMutation(api.topics.createTopic);
   const { user } = useUser();
   const router = useRouter();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [showCurrentImage, setShowCurrentImage] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(null);
+
+  useEffect(() => {
+    if (article?.categoryId) {
+      setCategoryId(article.categoryId);
+    }
+  }, [article?.categoryId]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -63,17 +65,28 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     setShowCurrentImage(false);
   }, []);
 
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value as Id<"categories">);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!article) return;
+    if (!article || !categoryId) return;
 
     setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
       const title = formData.get("title") as string;
-      const category = formData.get("category") as "politics" | "technology" | "finance" | "sports";
-      const tags = (formData.get("tags") as string).split(",").map(tag => tag.trim());
+      const topicNames = (formData.get("topics") as string).split(",").map(tag => tag.trim());
       const body = formData.get("body") as string;
+
+      // Get or create topics and collect their IDs
+      const topicIds = await Promise.all(
+        topicNames.map(async (name) => {
+          const { topicId } = await createTopic({ name });
+          return topicId;
+        })
+      );
 
       let imageStorageId = article.imageStorageId;
       
@@ -96,13 +109,16 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         // Get the storage ID from the response
         const { storageId } = await response.json();
         imageStorageId = storageId;
+      } else if (!showCurrentImage) {
+        // If the current image was removed, set imageStorageId to undefined
+        imageStorageId = undefined;
       }
 
       await updateArticle({
         id: article._id,
         title,
-        category,
-        tags,
+        categoryId,
+        topicIds,
         body,
         imageStorageId,
       });
@@ -238,28 +254,21 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
         {/* Category */}
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select name="category" defaultValue={article.category}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="politics">Politics</SelectItem>
-              <SelectItem value="technology">Technology</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
-              <SelectItem value="sports">Sports</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label>Category</Label>
+          <CategorySelector
+            value={categoryId?.toString() || ""}
+            onChange={handleCategoryChange}
+          />
         </div>
 
-        {/* Tags */}
+        {/* Topics */}
         <div className="space-y-2">
-          <Label htmlFor="tags">Tags (comma separated)</Label>
+          <Label htmlFor="topics">Topics (comma separated)</Label>
           <Input
-            id="tags"
-            name="tags"
-            defaultValue={article.tags.join(", ")}
-            placeholder="Enter tags separated by commas"
+            id="topics"
+            name="topics"
+            defaultValue={article.topics.map(t => t?.name).join(", ")}
+            placeholder="Enter topics separated by commas"
             required
           />
         </div>

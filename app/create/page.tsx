@@ -134,7 +134,7 @@ export default function CreatePage() {
             >
               <input {...getInputProps()} />
               {previewUrl ? (
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-48">
                   <Image
                     src={previewUrl}
                     alt="Preview"

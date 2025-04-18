@@ -3,21 +3,18 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ArticleList } from "@/components/article-list";
+import { FeaturedArticle } from "@/components/featured-article";
 
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-grey-50/50 flex items-center justify-center">
-      {/* Background grid */}
-      <div className="absolute inset-0 -z-10 w-full h-full bg-white bg-[linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)] bg-[size:6rem_4rem]"/>
-
-      <div className="w-full px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8 flex flex-col items-center space-y-10 text-center">
+      <div className="w-full px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8 flex flex-col items-center text-center">
         {/* Hero section */}
-        {/* <header className="space-y-6"> */}
-          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-            This is the Home page
-          </h1>
+
         {/* </header> */}
+        <FeaturedArticle />
+        <div className="w-full max-w-2xl mx-auto border-t-2 border-gray-100 mt-4" />
         <ArticleList />
 
         <SignedIn>

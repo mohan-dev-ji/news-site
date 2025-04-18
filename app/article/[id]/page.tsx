@@ -21,10 +21,10 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Banner Image */}
       {article.imageUrl && (
-        <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
+        <div className="relative w-full h-[300px] mb-8 rounded-lg overflow-hidden">
           <Image
             src={article.imageUrl}
             alt={article.title}

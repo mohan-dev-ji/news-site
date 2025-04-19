@@ -23,12 +23,13 @@ import { useRouter } from "next/navigation";
 import { CategorySelector } from "@/components/category-selector";
 import { TopicsSelector } from "@/components/topics-selector";
 import { Id } from "@/convex/_generated/dataModel";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 // Form schema validation
 const formSchema = z.object({
   title: z.string().min(5, "Title too short"),
   body: z.string(),
-  categoryId: z.custom<Id<"categories">>(),
+  categoryId: z.string().min(1, "Please select a category"),
 });
 
 export default function CreatePage() {
@@ -72,7 +73,7 @@ export default function CreatePage() {
       const { articleId } = await createArticle({
         title: values.title,
         body: values.body,
-        categoryId: values.categoryId,
+        categoryId: values.categoryId as Id<"categories">,
         topicIds,
         imageStorageId,
       });
@@ -107,7 +108,7 @@ export default function CreatePage() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Create New Article</h1>
 
       <Form {...form}>
@@ -203,10 +204,9 @@ export default function CreatePage() {
               <FormItem>
                 <FormLabel>Article Content</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Write your article content here"
-                    className="min-h-[300px]"
-                    {...field}
+                  <RichTextEditor
+                    content={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />

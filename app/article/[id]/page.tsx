@@ -89,9 +89,10 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
         )}
 
         {/* Article Body */}
-        <div className="whitespace-pre-wrap">
-          {article.body}
-        </div>
+        <div 
+          className="prose prose-lg max-w-none [&>h1]:text-4xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:mb-4 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ol]:list-decimal [&>ol]:pl-6 [&>img]:rounded-lg [&>img]:my-4"
+          dangerouslySetInnerHTML={{ __html: article.body }}
+        />
 
         {/* Edit and Delete Buttons - Only visible to admin */}
         {isAdmin(user?.id) && (

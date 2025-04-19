@@ -9,12 +9,12 @@ import { isAdmin } from "@/lib/admin";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { CategorySelector } from "@/components/category-selector";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 export default function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -29,12 +29,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [showCurrentImage, setShowCurrentImage] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(null);
+  const [bodyContent, setBodyContent] = useState<string>("");
 
   useEffect(() => {
-    if (article?.categoryId) {
+    if (article) {
       setCategoryId(article.categoryId);
+      setBodyContent(article.body);
     }
-  }, [article?.categoryId]);
+  }, [article]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -78,7 +80,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       const formData = new FormData(e.currentTarget);
       const title = formData.get("title") as string;
       const topicNames = (formData.get("topics") as string).split(",").map(tag => tag.trim());
-      const body = formData.get("body") as string;
+      const body = bodyContent;
+
+      console.log("Submitting article with:", {
+        title,
+        body,
+        topicNames,
+        categoryId,
+      });
 
       // Get or create topics and collect their IDs
       const topicIds = await Promise.all(
@@ -92,10 +101,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       
       // If a new image was selected, upload it
       if (selectedImageFile) {
-        // Get a URL for uploading the image
         const uploadUrl = await generateUploadUrl();
-        
-        // Upload the image
         const response = await fetch(uploadUrl, {
           method: "POST",
           headers: { "Content-Type": selectedImageFile.type },
@@ -106,7 +112,6 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           throw new Error("Failed to upload image");
         }
         
-        // Get the storage ID from the response
         const { storageId } = await response.json();
         imageStorageId = storageId;
       } else if (!showCurrentImage) {
@@ -252,48 +257,39 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           />
         </div>
 
+         {/* Topics */}
+         <div className="space-y-2">
+          <Label htmlFor="topics">Topics (comma-separated)</Label>
+          <Input
+            id="topics"
+            name="topics"
+            defaultValue={article.topics?.map(topic => topic?.name || "").join(", ")}
+            placeholder="Enter topics, separated by commas"
+          />
+        </div>
+
         {/* Category */}
         <div className="space-y-2">
           <Label>Category</Label>
           <CategorySelector
-            value={categoryId?.toString() || ""}
+            value={categoryId || ""}
             onChange={handleCategoryChange}
-          />
-        </div>
-
-        {/* Topics */}
-        <div className="space-y-2">
-          <Label htmlFor="topics">Topics (comma separated)</Label>
-          <Input
-            id="topics"
-            name="topics"
-            defaultValue={article.topics.map(t => t?.name).join(", ")}
-            placeholder="Enter topics separated by commas"
-            required
           />
         </div>
 
         {/* Body */}
         <div className="space-y-2">
-          <Label htmlFor="body">Article Content</Label>
-          <Textarea
-            id="body"
-            name="body"
-            defaultValue={article.body}
-            placeholder="Write your article content here"
-            className="min-h-[300px]"
-            required
+          <Label htmlFor="body">Content</Label>
+          <RichTextEditor
+            content={bodyContent}
+            onChange={(content) => {
+              console.log("Content changed:", content);
+              setBodyContent(content);
+            }}
           />
         </div>
 
-        <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push(`/article/${resolvedParams.id}`)}
-          >
-            Cancel
-          </Button>
+        <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>

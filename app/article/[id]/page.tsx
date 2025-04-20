@@ -3,7 +3,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { use } from "react";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
@@ -23,16 +22,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const article = useQuery(api.articles.getArticle, { id: resolvedParams.id as Id<"articles"> });
+export default function ArticlePage({ params }: { params: { id: string } }) {
+  const article = useQuery(api.articles.getArticle, { id: params.id as Id<"articles"> });
   const deleteArticle = useMutation(api.articles.deleteArticle);
   const { user } = useUser();
   const router = useRouter();
 
   const handleDelete = async () => {
     try {
-      await deleteArticle({ id: resolvedParams.id as Id<"articles"> });
+      await deleteArticle({ id: params.id as Id<"articles"> });
       router.push("/");
     } catch (error) {
       console.error("Error deleting article:", error);
@@ -96,17 +94,17 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
 
         {/* Edit and Delete Buttons - Only visible to admin */}
         {isAdmin(user?.id) && (
-          <div className="mt-8 flex justify-end gap-4">
-            <Link href={`/article/${resolvedParams.id}/edit`}>
-              <Button variant="outline" className="gap-2">
-                <Pencil className="h-4 w-4" />
+          <div className="flex gap-4 mt-8">
+            <Link href={`/article/${params.id}/edit`}>
+              <Button variant="outline" size="sm">
+                <Pencil className="w-4 h-4 mr-2" />
                 Edit Article
               </Button>
             </Link>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="gap-2">
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="w-4 h-4 mr-2" />
                   Delete Article
                 </Button>
               </AlertDialogTrigger>
@@ -114,15 +112,12 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the article
-                    and remove the data from our servers.
+                    This action cannot be undone. This will permanently delete the article.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Delete
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

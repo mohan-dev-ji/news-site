@@ -17,7 +17,6 @@ interface Article {
     slug: string;
     createdAt: number;
   } | null;
-  tags: string[];
   authorId: string;
   createdAt: number;
   imageUrl: string | null;

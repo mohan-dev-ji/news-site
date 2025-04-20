@@ -193,7 +193,23 @@ export const getArticlesByCategory = query({
       .filter((q) => q.eq(q.field("categoryId"), args.categoryId))
       .collect();
 
-    return articles;
+    const articlesWithDetails = await Promise.all(
+      articles.map(async (article) => {
+        const category = await ctx.db.get(article.categoryId);
+        let imageUrl = null;
+        if (article.imageStorageId) {
+          imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+        }
+        return {
+          ...article,
+          category,
+          imageUrl,
+          tags: [], // Add empty tags array to match Article interface
+        };
+      })
+    );
+
+    return articlesWithDetails;
   },
 });
 
@@ -204,9 +220,30 @@ export const getArticlesByTopic = query({
     
     const articles = await ctx.db
       .query("articles")
-      .filter((q) => q.eq(q.field("topicIds"), args.topicId))
       .collect();
 
-    return articles;
+    // Filter articles that contain the topic ID
+    const filteredArticles = articles.filter(article => 
+      article.topicIds.some(id => id === args.topicId)
+    );
+
+    const articlesWithDetails = await Promise.all(
+      filteredArticles.map(async (article) => {
+        const category = article.categoryId
+          ? await ctx.db.get(article.categoryId)
+          : null;
+        let imageUrl = null;
+        if (article.imageStorageId) {
+          imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+        }
+        return {
+          ...article,
+          category,
+          imageUrl,
+        };
+      })
+    );
+
+    return articlesWithDetails.sort((a, b) => b.createdAt - a.createdAt);
   },
 });

@@ -3,10 +3,9 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { FilteredArticleList } from "@/components/filtered-article-list";
-import { use } from "react";
 
-export default function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function TopicPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const topic = useQuery(api.topics.getTopicBySlug, { slug });
   const articles = useQuery(api.articles.getArticlesByTopic, { topicId: topic?._id });
 

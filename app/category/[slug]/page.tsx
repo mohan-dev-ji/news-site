@@ -3,15 +3,14 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { FilteredArticleList } from "@/components/filtered-article-list";
-import { use } from "react";
 
-export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function CategoryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const category = useQuery(api.categories.getCategoryBySlug, { slug });
   const articles = useQuery(api.articles.getArticlesByCategory, { categoryId: category?._id });
 
   if (!category) {
-    return <div>Category not found</div>;
+    return <div>Loading...</div>;
   }
 
   return (

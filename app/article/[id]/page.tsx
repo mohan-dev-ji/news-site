@@ -60,7 +60,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
 
       {/* Article Content */}
       <article className="prose prose-lg max-w-none">
-        <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+        <h1 className="text-4xl font-extrabold mb-4">{article.title}</h1>
         
         <div className="flex items-center gap-4 text-gray-600 mb-8">
           <span className="capitalize">{article.category?.name}</span>

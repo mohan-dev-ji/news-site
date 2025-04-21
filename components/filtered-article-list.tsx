@@ -6,20 +6,20 @@ import { Id } from "@/convex/_generated/dataModel";
 import TimeAgo from "react-timeago";
 
 interface Article {
-  _id: Id<"articles">;
-  title: string;
-  body: string;
-  category: {
-    _id: Id<"categories">;
-    name: string;
-    slug: string;
+    _id: Id<"articles">;
+    title: string;
+    body: string;
+    category: {
+      _id: Id<"categories">;
+      name: string;
+      slug: string;
+      _creationTime: number;
+    } | null;
+    authorId: string;
+    createdAt: number;
+    imageUrl: string | null;
     _creationTime: number;
-  } | null;
-  authorId: string;
-  createdAt: number;
-  imageUrl: string | null;
-  _creationTime: number;
-}
+  }
 
 interface FilteredArticleListProps {
   articles: Article[];

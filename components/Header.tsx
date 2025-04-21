@@ -9,7 +9,7 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { Logo } from "./logo";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import UserProfileModal from "./UserProfileModal";
+
 
 export default function Header() {
   const { isSignedIn } = useUser();

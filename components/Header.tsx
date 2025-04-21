@@ -9,6 +9,7 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { Logo } from "./logo";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import UserProfileModal from "./UserProfileModal";
 
 export default function Header() {
   const { isSignedIn } = useUser();
@@ -130,7 +131,15 @@ function AuthSection() {
     <>
       {isSignedIn ? (
         <div className="flex items-center gap-2">
-          <UserButton afterSignOutUrl="/" />
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonPopoverCard: "w-96",
+              },
+            }}
+            afterSignOutUrl="/"
+            userProfileUrl="/profile"
+          />
         </div>
       ) : (
         <Link href="/sign-in">

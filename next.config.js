@@ -6,7 +6,12 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ['honorable-panther-60.convex.cloud'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.convex.cloud',
+      },
+    ],
   },
 };
 

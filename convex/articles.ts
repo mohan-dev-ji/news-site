@@ -65,9 +65,18 @@ export const getArticle = query({
       ? await Promise.all(article.topicIds.map(id => ctx.db.get(id)))
       : [];
 
-    const imageUrl = article.imageStorageId
-      ? await ctx.storage.getUrl(article.imageStorageId)
-      : null;
+    let imageUrl = null;
+    if (article.imageStorageId) {
+      try {
+        imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+        // Ensure the URL is absolute
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = `https://${imageUrl}`;
+        }
+      } catch (error) {
+        console.error("Error getting image URL:", error);
+      }
+    }
 
     return {
       ...article,
@@ -133,7 +142,15 @@ export const getAllArticles = query({
         const category = await ctx.db.get(article.categoryId);
         let imageUrl = null;
         if (article.imageStorageId) {
-          imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+          try {
+            imageUrl = await ctx.storage.getUrl(article.imageStorageId);
+            // Ensure the URL is absolute
+            if (imageUrl && !imageUrl.startsWith('http')) {
+              imageUrl = `https://${imageUrl}`;
+            }
+          } catch (error) {
+            console.error("Error getting image URL:", error);
+          }
         }
         return {
           ...article,

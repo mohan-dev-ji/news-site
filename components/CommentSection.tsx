@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
@@ -51,11 +51,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
       </div>
 
       {user ? (
-        <CommentForm 
-          articleId={articleId}
-          editingCommentId={editingCommentId}
-          setEditingCommentId={setEditingCommentId}
-        />
+        <CommentForm articleId={articleId} />
       ) : null}
     </div>
   );

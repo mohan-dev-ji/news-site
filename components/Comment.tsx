@@ -60,14 +60,13 @@ export function Comment({ comment, currentUserId, onEdit, onCancelEdit }: Commen
   };
 
   const isAuthor = currentUserId === comment.userId;
-  const commentUserImage = user?.id === comment.userId ? user.imageUrl : null;
 
   return (
     <div className="space-y-2 rounded-lg border p-4">
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
           <AvatarImage 
-            src={commentUserImage || `https://avatar.vercel.sh/${comment.userId}.png`} 
+            src={`https://avatar.vercel.sh/${comment.userId}.png`} 
             className="object-cover"
           />
           <AvatarFallback>{comment.username[0]}</AvatarFallback>

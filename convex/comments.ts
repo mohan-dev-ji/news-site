@@ -23,15 +23,25 @@ export const createComment = mutation({
     articleId: v.id("articles"),
     userId: v.string(),
     username: v.string(),
+    avatarUrl: v.string(),
     content: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    if (identity.subject !== args.userId) {
+      throw new Error("Not authorized");
+    }
+
     const commentId = await ctx.db.insert("comments", {
       articleId: args.articleId,
       userId: args.userId,
       username: args.username,
+      avatarUrl: args.avatarUrl,
       content: args.content,
       createdAt: now,
       updatedAt: now,

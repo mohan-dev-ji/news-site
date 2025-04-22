@@ -10,12 +10,14 @@ import { Pencil, Trash2, Save, X } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Textarea } from "./ui/textarea";
 import { useState } from "react";
+import { UserAvatar } from "./UserAvatar";
 
 interface CommentProps {
   comment: {
     _id: Id<"comments">;
     userId: string;
     username: string;
+    avatarUrl?: string;
     content: string;
     createdAt: number;
     updatedAt: number;
@@ -64,13 +66,11 @@ export function Comment({ comment, currentUserId, onEdit, onCancelEdit }: Commen
   return (
     <div className="space-y-2 rounded-lg border p-4">
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage 
-            src={`https://avatar.vercel.sh/${comment.userId}.png`} 
-            className="object-cover"
-          />
-          <AvatarFallback>{comment.username[0]}</AvatarFallback>
-        </Avatar>
+        <UserAvatar 
+          userId={comment.userId} 
+          username={comment.username} 
+          avatarUrl={comment.avatarUrl}
+        />
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-medium">{comment.username}</span>

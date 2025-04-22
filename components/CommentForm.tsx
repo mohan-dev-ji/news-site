@@ -52,6 +52,7 @@ export function CommentForm({
           articleId,
           userId: user.id,
           username: user.unsafeMetadata?.username as string || "Anonymous",
+          avatarUrl: user.imageUrl || "",
           content: content.trim(),
         });
       }

@@ -28,6 +28,7 @@ export default defineSchema({
     articleId: v.id("articles"),
     userId: v.string(),
     username: v.string(),
+    avatarUrl: v.optional(v.string()),
     content: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),

@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as articles from "../articles.js";
 import type * as categories from "../categories.js";
+import type * as comments from "../comments.js";
 import type * as migrations from "../migrations.js";
 import type * as topics from "../topics.js";
 
@@ -29,6 +30,7 @@ import type * as topics from "../topics.js";
 declare const fullApi: ApiFromModules<{
   articles: typeof articles;
   categories: typeof categories;
+  comments: typeof comments;
   migrations: typeof migrations;
   topics: typeof topics;
 }>;

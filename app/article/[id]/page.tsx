@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CommentSection } from "@/components/CommentSection";
 
 export default function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -129,6 +130,10 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
           </div>
         )}
       </article>
+
+      <div className="max-w-3xl mx-auto mt-16">
+        <CommentSection articleId={article._id} />
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ export default defineSchema({
     categoryId: v.id("categories"),
     topicIds: v.array(v.id("topics")),
     authorId: v.string(),
+    authorName: v.optional(v.string()),
     createdAt: v.number(),
     imageStorageId: v.optional(v.id("_storage")), // Field for storing file storage ID
   }).index("by_category", ["categoryId"]),
@@ -23,4 +24,16 @@ export default defineSchema({
     slug: v.string(),
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
+
+  comments: defineTable({
+    articleId: v.id("articles"),
+    userId: v.string(),
+    username: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    isDeleted: v.boolean(),
+  })
+  .index("by_article", ["articleId"])
+  .index("by_user", ["userId"]),
 });

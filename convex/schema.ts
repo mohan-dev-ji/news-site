@@ -8,7 +8,6 @@ export default defineSchema({
     categoryId: v.id("categories"),
     topicIds: v.array(v.id("topics")),
     authorId: v.string(),
-    authorName: v.optional(v.string()),
     createdAt: v.number(),
     imageStorageId: v.optional(v.id("_storage")), // Field for storing file storage ID
   }).index("by_category", ["categoryId"]),
